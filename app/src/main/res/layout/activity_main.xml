@@ -1,56 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center_horizontal"
+    android:gravity="center"
     android:padding="24dp"
-    android:background="#FFFFFF">
+    android:background="#F4F6FA">
 
     <TextView
-        android:id="@+id/txtTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="MULTI-CONVERTER"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="#202A44"
+        android:textColor="#17365D"
         android:gravity="center"
-        android:layout_marginTop="35dp" />
+        android:layout_marginBottom="12dp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Select a conversion category"
-        android:textSize="16sp"
-        android:textColor="#666666"
+        android:textSize="18sp"
+        android:textColor="#333333"
         android:gravity="center"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="20dp"/>
 
     <Spinner
         android:id="@+id/categorySpinner"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:backgroundTint="#202A44" />
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:layout_marginBottom="24dp"/>
 
     <ImageView
         android:id="@+id/categoryImage"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
-        android:layout_marginTop="30dp"
-        android:background="#F0F2F5"
-        android:padding="20dp"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
         android:scaleType="fitCenter"
-        android:contentDescription="Selected conversion category image" />
+        android:contentDescription="Selected category image"
+        android:layout_marginBottom="24dp"/>
 
     <Button
         android:id="@+id/btnContinue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="CONTINUE"
-        android:textAllCaps="true"
-        android:layout_marginTop="35dp" />
+        android:textSize="18sp"
+        android:padding="12dp"/>
 
 </LinearLayout>
