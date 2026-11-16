@@ -1,3 +1,4 @@
+
 package com.monlau.conversordistanciasjava;
 
 import android.os.Bundle;
@@ -29,8 +30,8 @@ public class ConversionActivity extends AppCompatActivity {
 
     private final Map<String, Unit> units = new LinkedHashMap<>();
 
-    private final Map<String, CurrencyUnit> currencies =
-            new LinkedHashMap<>();
+    private final CurrencyConverter currencyConverter =
+            new CurrencyConverter();
 
     // Clase para unidades normales
     private static class Unit {
@@ -41,18 +42,6 @@ public class ConversionActivity extends AppCompatActivity {
         Unit(double factor, double offset) {
             this.factor = factor;
             this.offset = offset;
-        }
-    }
-
-    // Clase específica para monedas
-    private static class CurrencyUnit {
-
-        String code;
-        double rateToEUR;
-
-        CurrencyUnit(String code, double rateToEUR) {
-            this.code = code;
-            this.rateToEUR = rateToEUR;
         }
     }
 
@@ -84,8 +73,7 @@ public class ConversionActivity extends AppCompatActivity {
 
         // Cargar las unidades correspondientes
         if (selectedCategory.equals("Currency")) {
-            loadCurrencies();
-            setupSpinners(currencies.keySet().toArray(new String[0]));
+            setupSpinners(currencyConverter.getCurrencyNames());
         } else {
             loadUnits(selectedCategory);
             setupSpinners(units.keySet().toArray(new String[0]));
@@ -198,20 +186,6 @@ public class ConversionActivity extends AppCompatActivity {
         }
     }
 
-    // Cargar monedas con EUR como referencia
-    private void loadCurrencies() {
-
-        currencies.clear();
-
-        // Tasas de ejemplo para la práctica.
-        // Representan cuántos euros equivale una unidad de moneda.
-        currencies.put("Euro (EUR)", new CurrencyUnit("EUR", 1.0));
-        currencies.put("US Dollar (USD)", new CurrencyUnit("USD", 0.92));
-        currencies.put("British Pound (GBP)", new CurrencyUnit("GBP", 1.17));
-        currencies.put("Japanese Yen (JPY)", new CurrencyUnit("JPY", 0.0062));
-        currencies.put("Swiss Franc (CHF)", new CurrencyUnit("CHF", 1.05));
-    }
-
     // Realizar la conversión
     private void convert(String category) {
 
@@ -243,13 +217,7 @@ public class ConversionActivity extends AppCompatActivity {
 
         if (category.equals("Currency")) {
 
-            CurrencyUnit source = currencies.get(from);
-            CurrencyUnit target = currencies.get(to);
-
-            // Convertir primero a euros y después a la moneda destino
-            double valueInEUR = value * source.rateToEUR;
-
-            result = valueInEUR / target.rateToEUR;
+            result = currencyConverter.convert(value, from, to);
 
         } else {
 
