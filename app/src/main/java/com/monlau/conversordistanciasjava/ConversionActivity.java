@@ -1,4 +1,3 @@
-
 package com.monlau.conversordistanciasjava;
 
 import android.os.Bundle;
@@ -33,9 +32,8 @@ public class ConversionActivity extends AppCompatActivity {
     private final CurrencyConverter currencyConverter =
             new CurrencyConverter();
 
-    // Clase para unidades normales
+    // Clase para guardar el factor y el desplazamiento de cada unidad.
     private static class Unit {
-
         double factor;
         double offset;
 
@@ -60,7 +58,6 @@ public class ConversionActivity extends AppCompatActivity {
         btnConvert = findViewById(R.id.btnConvert);
         btnBack = findViewById(R.id.btnBack);
 
-        // Recibir la categoría desde MainActivity
         String category = getIntent().getStringExtra("CATEGORY");
 
         if (category == null) {
@@ -71,7 +68,6 @@ public class ConversionActivity extends AppCompatActivity {
 
         txtCategory.setText(selectedCategory + " converter");
 
-        // Cargar las unidades correspondientes
         if (selectedCategory.equals("Currency")) {
             setupSpinners(currencyConverter.getCurrencyNames());
         } else {
@@ -80,13 +76,10 @@ public class ConversionActivity extends AppCompatActivity {
         }
 
         btnConvert.setOnClickListener(v -> convert(selectedCategory));
-
         btnBack.setOnClickListener(v -> finish());
     }
 
-    // Preparar los dos Spinner
     private void setupSpinners(String[] names) {
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
@@ -105,13 +98,10 @@ public class ConversionActivity extends AppCompatActivity {
         }
     }
 
-    // Cargar las unidades de cada categoría
     private void loadUnits(String category) {
-
         units.clear();
 
         switch (category) {
-
             case "Distance":
                 units.put("Meter (m)", new Unit(1, 0));
                 units.put("Kilometer (km)", new Unit(1000, 0));
@@ -123,8 +113,10 @@ public class ConversionActivity extends AppCompatActivity {
 
             case "Temperature":
                 units.put("Celsius (°C)", new Unit(1, 0));
-                units.put("Fahrenheit (°F)",
-                        new Unit(5.0 / 9.0, -32.0 * 5.0 / 9.0));
+                units.put(
+                        "Fahrenheit (°F)",
+                        new Unit(5.0 / 9.0, -32.0 * 5.0 / 9.0)
+                );
                 units.put("Kelvin (K)", new Unit(1, -273.15));
                 break;
 
@@ -186,9 +178,7 @@ public class ConversionActivity extends AppCompatActivity {
         }
     }
 
-    // Realizar la conversión
     private void convert(String category) {
-
         String input = edtValue.getText().toString().trim();
 
         if (input.isEmpty()) {
@@ -204,31 +194,59 @@ public class ConversionActivity extends AppCompatActivity {
             if (Double.isNaN(value) || Double.isInfinite(value)) {
                 throw new NumberFormatException();
             }
-
         } catch (NumberFormatException e) {
             showMessage("Please enter a valid number");
+            return;
+        }
+
+        if (spinnerFrom.getSelectedItem() == null
+                || spinnerTo.getSelectedItem() == null) {
+            showMessage("Please select the units");
             return;
         }
 
         String from = spinnerFrom.getSelectedItem().toString();
         String to = spinnerTo.getSelectedItem().toString();
 
+        // No se admiten valores negativos en categorías distintas de temperatura.
+        if (!category.equals("Temperature") && value < 0) {
+            showMessage("Negative values are not allowed for this category");
+            return;
+        }
+
         double result;
 
         if (category.equals("Currency")) {
-
             result = currencyConverter.convert(value, from, to);
-
         } else {
-
             Unit source = units.get(from);
             Unit target = units.get(to);
 
-            // Convertir a la unidad de referencia
+            if (source == null || target == null) {
+                showMessage("This conversion cannot be performed");
+                return;
+            }
+
+            // Convertir a la unidad de referencia.
             double baseValue = value * source.factor + source.offset;
 
-            // Convertir de la referencia a la unidad destino
+            // La unidad de referencia para temperatura es Celsius.
+            if (category.equals("Temperature")
+                    && baseValue < -273.15 - 0.000000001) {
+                showMessage("Temperature cannot be below absolute zero");
+                return;
+            }
+
+            // Convertir desde la referencia a la unidad destino.
             result = (baseValue - target.offset) / target.factor;
+
+            // Evitar un Kelvin negativo causado por redondeo decimal.
+            if (category.equals("Temperature")
+                    && to.equals("Kelvin (K)")
+                    && result < 0
+                    && result > -0.000000001) {
+                result = 0;
+            }
         }
 
         if (Double.isNaN(result) || Double.isInfinite(result)) {
@@ -249,9 +267,7 @@ public class ConversionActivity extends AppCompatActivity {
         showMessage("Conversion completed");
     }
 
-    // Mostrar mensajes mediante Snackbar
     private void showMessage(String message) {
-
         Snackbar.make(
                 findViewById(R.id.main),
                 message,
